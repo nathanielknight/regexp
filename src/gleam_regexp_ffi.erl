@@ -33,7 +33,7 @@ submatches(String, {Start, Length}) ->
 
 matches(String, [{Start, Length} | Submatches]) ->
     Submatches1 = lists:map(fun(X) -> submatches(String, X) end, Submatches),
-    {match, binary:part(String, Start, Length), Submatches1}.
+    {match, binary:part(String, Start, Length), Submatches1, Start}.
 
 scan(Regexp, String) ->
     case re:run(String, Regexp, [global]) of
@@ -43,4 +43,3 @@ scan(Regexp, String) ->
 
 replace(Regexp, Subject, Replacement) ->
     re:replace(Subject, Regexp, Replacement, [global, {return, binary}]).
-

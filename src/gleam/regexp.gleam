@@ -16,6 +16,8 @@ pub type Match {
     content: String,
     /// A `Regexp` can have subpatterns, sup-parts that are in parentheses.
     submatches: List(Option(String)),
+    /// TODO docs
+    start_position: Int,
   )
 }
 

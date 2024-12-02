@@ -87,56 +87,94 @@ pub fn matching_split_test() {
   ])
 }
 
+import gleam/io
+
 pub fn scan_test() {
   let assert Ok(re) = regexp.from_string("Gl\\w+")
 
   regexp.scan(re, "!Gleam")
-  |> should.equal([Match(content: "Gleam", submatches: [])])
+  |> should.equal([Match(content: "Gleam", submatches: [], start_position: 1)])
 
   regexp.scan(re, "हGleam")
-  |> should.equal([Match(content: "Gleam", submatches: [])])
+  |> should.equal([Match(content: "Gleam", submatches: [], start_position: 1)])
 
   regexp.scan(re, "𐍈Gleam")
-  |> should.equal([Match(content: "Gleam", submatches: [])])
+  |> should.equal([Match(content: "Gleam", submatches: [], start_position: 1)])
+
+  io.debug(1)
 
   let assert Ok(re) = regexp.from_string("[oi]n a(.?) (\\w+)")
 
   regexp.scan(re, "I am on a boat in a lake.")
   |> should.equal([
-    Match(content: "on a boat", submatches: [None, Some("boat")]),
-    Match(content: "in a lake", submatches: [None, Some("lake")]),
+    Match(
+      content: "on a boat",
+      submatches: [None, Some("boat")],
+      start_position: 5,
+    ),
+    Match(
+      content: "in a lake",
+      submatches: [None, Some("lake")],
+      start_position: 15,
+    ),
   ])
 
   let assert Ok(re) = regexp.from_string("answer (\\d+)")
   regexp.scan(re, "Is the answer 42?")
-  |> should.equal([Match(content: "answer 42", submatches: [Some("42")])])
+  |> should.equal([
+    Match(content: "answer 42", submatches: [Some("42")], start_position: 7),
+  ])
+
+  io.debug(2)
 
   let assert Ok(re) = regexp.from_string("(\\d+)")
   regexp.scan(re, "hello 42")
-  |> should.equal([Match(content: "42", submatches: [Some("42")])])
+  |> should.equal([
+    Match(content: "42", submatches: [Some("42")], start_position: 7),
+  ])
 
   regexp.scan(re, "你好 42")
-  |> should.equal([Match(content: "42", submatches: [Some("42")])])
+  |> should.equal([
+    Match(content: "42", submatches: [Some("42")], start_position: 3),
+  ])
 
   regexp.scan(re, "你好 42 世界")
-  |> should.equal([Match(content: "42", submatches: [Some("42")])])
+  |> should.equal([
+    Match(content: "42", submatches: [Some("42")], start_position: 4),
+  ])
 
   let assert Ok(re) = regexp.from_string("([+|\\-])?(\\d+)(\\w+)?")
   regexp.scan(re, "+36kg")
   |> should.equal([
-    Match(content: "+36kg", submatches: [Some("+"), Some("36"), Some("kg")]),
+    Match(
+      content: "+36kg",
+      submatches: [Some("+"), Some("36"), Some("kg")],
+      start_position: 0,
+    ),
   ])
 
   regexp.scan(re, "36kg")
   |> should.equal([
-    Match(content: "36kg", submatches: [None, Some("36"), Some("kg")]),
+    Match(
+      content: "36kg",
+      submatches: [None, Some("36"), Some("kg")],
+      start_position: 0,
+    ),
   ])
 
   regexp.scan(re, "36")
-  |> should.equal([Match(content: "36", submatches: [None, Some("36")])])
+  |> should.equal([
+    Match(content: "36", submatches: [None, Some("36")], start_position: 0),
+  ])
 
   regexp.scan(re, "-36")
-  |> should.equal([Match(content: "-36", submatches: [Some("-"), Some("36")])])
+  |> should.equal([
+    Match(
+      content: "-36",
+      submatches: [Some("-"), Some("36")],
+      start_position: 0,
+    ),
+  ])
 
   regexp.scan(re, "-kg")
   |> should.equal([])
@@ -145,22 +183,30 @@ pub fn scan_test() {
     regexp.from_string("var\\s*(\\w+)\\s*(int|string)?\\s*=\\s*(.*)")
   regexp.scan(re, "var age int = 32")
   |> should.equal([
-    Match(content: "var age int = 32", submatches: [
-      Some("age"),
-      Some("int"),
-      Some("32"),
-    ]),
+    Match(
+      content: "var age int = 32",
+      submatches: [Some("age"), Some("int"), Some("32")],
+      start_position: 0,
+    ),
   ])
 
   regexp.scan(re, "var age = 32")
   |> should.equal([
-    Match(content: "var age = 32", submatches: [Some("age"), None, Some("32")]),
+    Match(
+      content: "var age = 32",
+      submatches: [Some("age"), None, Some("32")],
+      start_position: 0,
+    ),
   ])
 
   let assert Ok(re) = regexp.from_string("let (\\w+) = (\\w+)")
   regexp.scan(re, "let age = 32")
   |> should.equal([
-    Match(content: "let age = 32", submatches: [Some("age"), Some("32")]),
+    Match(
+      content: "let age = 32",
+      submatches: [Some("age"), Some("32")],
+      start_position: 0,
+    ),
   ])
 
   regexp.scan(re, "const age = 32")
@@ -190,3 +236,19 @@ pub fn replace_3_test() {
   regexp.replace(re, "🐈🐈 are great!", "🐕")
   |> should.equal("🐕🐕 are great!")
 }
+
+pub fn basic_position_test() {
+  let assert Ok(re) = regexp.from_string("a+")
+  let text = "alfalfa aardvark aaah"
+  let expected_positions = [
+    #(0, 0),
+    #(3, 3),
+    #(6, 6),
+    #(8, 9),
+    #(13, 13),
+    #(17, 19),
+  ]
+}
+// pub fn grapheme_position_test() {
+//   todo
+// }

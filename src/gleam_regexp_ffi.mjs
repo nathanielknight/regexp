@@ -41,7 +41,7 @@ export function scan(regex, string) {
         submatches[n - 1] = new None();
       }
     }
-    return new RegexMatch(content, List.fromArray(submatches));
+    return new RegexMatch(content, List.fromArray(submatches), match.index);
   });
   return List.fromArray(matches);
 }
